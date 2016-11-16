@@ -1,0 +1,90 @@
+<!doctype html>
+
+<!-- Assign our Angular Module -->
+<html ng-app="scotchTodo">
+
+<head>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Scotch Tutorial - Angular & Node Todo</title>
+	
+	<!-- load bootstrap css -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<style type="text/css">
+		html {
+			overflow-y: scroll;
+		}
+		body {
+			padding-top: 50px;
+		}
+		#todo-list{
+			margin-bottom: 30px;
+		}
+		#todo-form{
+			margin-bottom: 50px;
+		}
+	</style>
+	
+	<!-- scritps -->
+	<!--   
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
+	-->
+	
+	<script src="angular.min.js"></script>
+	
+	
+	<script src="core.js"></script>
+
+</head>
+
+<!-- Binds the controller all get all todos with init function -->
+<body ng-controller="mainController">
+	<div class="container">
+	
+		<!-- Header and Todos count -->
+		<div class="jumobtron text-center">
+			<h1>Scotch TODOS tutorial. Todos : <span class="label label-info">{{ todos.length }}</span></h1>
+		</div>
+		
+		<!-- Todo list -->
+		<div id="todo-list" class="row">
+			<div class="col-sm-4 col-sm-offset-4">
+				
+				<!-- LOOP over the todos -->
+				<div class="checkbox" ng-repeat="todo in todos">
+					<label><input type="checkbox" ng-click="deleteTodo(todo._id)"> {{ todo.text }}</label>
+				</div>				
+			</div> 
+		</div>
+		
+		<!-- FORM to create Todos --> 
+		<div id="todo-form" class="row">
+			<div class="col-sm-8 col-sm-offeset-2 text-center">
+				<form>
+					<div class="form-group">
+						
+						<!-- Bind this value to "formData.text" in Angular -->
+						<input type="text" class="form-control input-lg text-center" placeholder="what to do?" ng-model="formData.text">
+						
+					</div>
+					
+					<button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+					
+				</form>
+			</div>
+		</div>
+		
+		<!-- credits -->
+		<div class="text-center text-muted">
+			<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
+			<p>Read the <a href="http://scotch.io/tutorials/javascript/creating-a-single-page-todo-app-with-node-and-angular">tutorial</a>.</p>
+		</div>		
+		
+	</div>
+</body>
+
+
+</html>
