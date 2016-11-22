@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+
+	<head>
+		<title>CONTROLLERS - Thinkster</title>
+		<style>
+			div[ng-controller]{
+				margin-bottom: 25px;
+				padding-bottom: 25px;
+				border-bottom: 5px dashed black;
+			}
+		</style>
+		<script src="../js/angular.min.js"></script>
+		<script type="text/javascript">
+			
+			var controller_app = angular.module('controller_app', []);
+			
+			controller_app.controller('greetingController', ['$scope', function($scope){
+				// pass values to the $scope object
+				$scope.greeting = 'hello world!';
+			}]);
+			
+			// adding behavior to a $scope object
+			controller_app.controller('doubleController', ['$scope', function($scope){
+				$scope.double = function(value){
+					return value * 2;
+				}
+			}]);
+			
+			controller_app.controller('SpicyController', ['$scope', function($scope){
+				
+				$scope.spice = 'very';
+				
+				// Add methods to the $scope
+				$scope.chiliSpicy = function(){
+					$scope.spice = 'chili';
+				};
+				
+				/* These functions can now be accessed via $scope object within the controller */
+				$scope.tabascoSpicy = function(){
+					$scope.spice = 'tabasco';
+				};
+				
+			}]);
+			
+			// Controller can take arguments
+			controller_app.controller('SpicyController_2', ['$scope', function($scope){
+				
+				$scope.customSpice = 'wasabi';
+				$scope.spice = 'very';
+				
+				$scope.spicy = function(spice){
+					return $scope.spice = spice;
+				}
+				
+			}]);
+			
+			//Scope Inheritance
+			controller_app.controller('MainController', ['$scope', function($scope){
+				$scope.timeOfDay = 'morning';
+				$scope.name = 'Max';
+			}]);
+			controller_app.controller('ChildController', ['$scope', function($scope){
+				$scope.name = 'Henry';
+			}]);
+			controller_app.controller('GrandChildController', ['$scope', function($scope){
+				$scope.timeOfDay = 'evening';
+			}])
+			
+			// Testing Controllers (see app.spec.js for the tests)
+			controller_app.controller('testController', function($scope){
+				$scope.spices = [{"name" : "pasilla", "spiciness" : "mild"},
+				                 {"name" : "jalapeno", "spiciness" : "hot hot hot!"},
+				                 {"name" : "habanero", "spiciness" : "LAVA HOT!!"}];
+				$scope.spice = "habanero";
+			})
+			
+			
+			/******************************************************************************/
+			/**		https://thinkster.io/a-better-way-to-learn-angularjs/controllers     **/
+			/******************************************************************************/
+			
+			// Quote from tutorial
+			/*
+				The role of controllers in Angular is to expose data to our view via $scope, 
+				and to add functions to $scope that contain business logic to enhance view behavior. 
+				Presentation logic should remain within views and directives.
+			*/
+			
+			//The second parameter is an array that declares the module dependencies that our module uses.
+			var thinkster_controller = angular.module('thinkster_controller', []);
+			
+			thinkster_controller.controller('MainCtrl', function($scope){ // injecting $scope as a parameter
+				
+				$scope.message = 'hello';
+
+				$scope.updateMessage = function(message){
+					$scope.message = message;
+				}
+				
+			});
+			
+			// "Controller as"
+			// https://toddmotto.com/digging-into-angulars-controller-as-syntax/
+			// https://thinkster.io/a-better-way-to-learn-angularjs/controllers
+			/*
+			 * Change the way the data is bind to the controller 
+			   Instead of $scope, we can attach values and function directly to "this", controller as
+			 */
+			 thinkster_controller.controller('ControllerAs', function($scope){
+				 var self = this; // controller as
+				 
+				 self.message = 'hello';
+				 
+				 self.changeMessage = function(message){
+					 self.message = message;
+				 };
+			 });
+			 
+			
+			
+			
+			/*************** We need to bootstrap the modules in order to have multiple ng-app on the same page ************************/
+			angular.element(document).ready(function(){
+				angular.bootstrap(document.getElementById('thinkster_controller'), ['thinkster_controller']);
+			});
+			
+		</script>
+		<style>
+			div.spicy div{
+				padding: 10px;
+				border: 2px solid blue;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<main ng-app="controller_app">
+		HELLO WORLD 
+		
+			<!-- https://docs.angularjs.org/guide/controller -->
+			
+			<!-- setting up the initial state of a $scope object -->
+			<div ng-controller="greetingController">
+				{{ greeting }} 
+			</div>
+			
+			<div ng-controller="doubleController">
+				Two times <input ng-model=num> equals <span id="result">{{ double(num) }}</span>
+			</div>
+			
+			<!-- simple SpicyController example -->
+			<div id="spicy" ng-controller="SpicyController">
+				<button id="chili" ng-click="chiliSpicy()">Chili</button>
+				<button id="tabasco" ng-click="tabascoSpicy()">Tabasco</button>
+				<p>The food is {{ spice }} spicy!</p>
+			</div>
+			
+			<!-- Controllers can take arguments -->
+			<div ng-controller="SpicyController_2">
+				<input ng-model="customSpice">
+				<button ng-click="spicy('chili')">Chili</button>
+				<button id="buttonCustomSpice" ng-click="spicy(customSpice)">Custom Spice</button>
+				<p>The food is {{ spice }} spicy!</p>
+			</div>
+			
+			<!-- Scope Inheritance -->
+			<div class="spicy">
+				<h1>Scope Inheritance</h1>
+				<div ng-controller="MainController">
+					<p>Good {{timeOfDay}}, {{name}}!</p>
+					
+					<div ng-controller="ChildController">
+						<p>Good {{timeOfDay}}, {{name}}!</p>
+						
+						<div ng-controller="GrandChildController">
+							<p>Good {{timeOfDay}}, {{name}}!</p>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</main>     
+
+		<!-- https://thinkster.io/a-better-way-to-learn-angularjs/controllers -->
+		<section>
+			
+			<div id="thinkster_controller">
+				<h4>Thinkster Controllers tutorial</h4>
+				
+				<!-- old way to use controller -->
+				<div ng-controller="MainCtrl">
+					<p ng-model="message">{{ message }}</p>
+					<form ng-submit="updateMessage(newMessage)">
+						<input type="text" ng-model="newMessage">
+						<button type="submit">Update message</button>
+					</form>
+				</div>
+				
+				<!-- "controller as" -->
+				<h4>Controller as: ng-controller="ControllerAs as main"</h4>
+				<div ng-controller="ControllerAs as main">
+					<p>{{ main.message }}</p>
+					<form ng-submit="main.changeMessage(main.newMessage)">
+						<input type="text" ng-model="main.newMessage">
+						<button type="submit">Change message</button>
+					</form>
+				</div>
+				
+				
+			</div>
+		
+		
+		</section>
+
+		
+		<script src="http://localhost:35729/livereload.js"></script>
+		
+	</body>
+</html>

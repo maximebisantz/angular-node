@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+	<head>
+		<title>SERVICES - thinkster tutorial</title>
+		<script src="../js/angular.min.js"></script>
+		<script>
+			
+			/** https://docs.angularjs.org/guide/services **/
+			angular.
+			module('myServiceModule', []).
+			controller('MyController', ['$scope', 'notify', function($scope, notify){
+				$scope.callNotify = function(msg){
+					notify(msg);
+				}
+			}]).
+			factory('notify', ['$window', function(win){
+				var msgs = [];
+				return function(msg){
+					msgs.push(msg);
+					if(msgs.length === 3){
+						win.alert(msgs.join('\n'));
+						msgs = [];
+					}
+				}
+			}])
+			
+			/*******************************************************************************************
+			 	The service factory function generates the single object 
+			 	or function that represents the service to the rest of the application. 
+			 	The object or function returned by the service is injected into any component 
+			 	(controller, service, filter or directive) that specifies a dependency on the service.
+			*********************************************************************************************/
+			var myModule = angular.module('myModule', []);
+			
+			myModule.factory('serviceId', function(){
+				var shinyNewServiceInstance;
+				// factory function body that constructs shinyNewServiceInstance.
+				return shinyNewServiceInstance;
+			})
+			
+			// registering a service with $provide
+			angular.module('myModule', []).config(['$provide', function($provide){
+				$provide.factory('serviceId', function(){
+					var newInstance;
+					// function constructor
+					return newInstance;
+				})
+			}])
+			
+			/* ==================================================================================== */
+			/* ==================================================================================== */
+			
+			/** https://thinkster.io/a-better-way-to-learn-angularjs/services **/
+			
+			// set up angular module and create service "message"
+			var thinksterService = angular.module('thinksterService', []);
+			
+			thinksterService.factory('messages', function(){
+				
+				// This is the object that dependencies of this service will receive.
+				var messages = {};
+				
+				messages.list = [];
+				
+				messages.add = function(message){
+					messages.list.push({id: messages.list.length, text: message});
+				};
+				
+				return messages;
+				
+			});
+			
+			// create controllers to make use of the service.
+			/** -------------------------------------------- **/
+			// Controller "ListCtrl" injects "messages" service and exposes the list to our view.
+			thinksterService.controller('ListCtrl', function(messages){
+				var self = this;
+				
+				self.messages = messages.list;
+			});
+			// Controller "PostCtrl" to help populate the list of messages (also injecting "messages" service)
+			thinksterService.controller('PostCtrl', function(messages){
+				var self = this;
+				
+				// default value for our model
+				self.newMessage = 'Hello World!';
+				
+				self.addMessage = function(message){
+					messages.add(message); // use of the "add" function from the service
+					self.newMessage = ''; // clear the field after being sent.
+				}
+			})
+			
+		
+			// must bootstrap manually second module
+			angular.element(document).ready(function(){
+				angular.bootstrap(document.getElementById('thinksterService'), ['thinksterService']);
+			});
+		</script>
+		<style>
+			section{
+				border: 2px solid Black;
+				padding: 20px;
+			}
+			div[ng-controller]{
+				border: 3px dashed blue;
+				padding: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		
+		<!-- https://docs.angularjs.org/guide/services -->
+		<section ng-app="myServiceModule">
+			<div id="simple" ng-controller="MyController">
+				<p>Let's try this simple notify service, injected into the controller...</p>
+				<!-- ng-init will set the default value for ng-model -->
+				<input ng-init="message='test'" ng-model="message">
+				<button ng-click="callNotify(message);">NOTIFY</button>
+				<p>You have to click 3 times to see an alert</p>
+			</div>
+		</section>
+		
+		<!-- https://thinkster.io/a-better-way-to-learn-angularjs/services -->
+		<section id="thinksterService" ng-app="thinksterService">
+			
+			<h1>Services</h1>
+			
+			<!-- create the view for ListCtrl -->
+			<div ng-controller="ListCtrl as list">
+				<!-- ng-repeat to display the list of messages -->
+				<p ng-repeat="message in list.messages">{{ message.id }} : {{ message.text }}</p>
+			</div>
+			
+			<!-- create form for PostCtrl -->
+			<div ng-controller="PostCtrl as post">
+				<form ng-submit="post.addMessage(post.newMessage)">
+					<input type="text" ng-model="post.newMessage">
+					<button type="submit">Add Message</button>
+				</form>
+			</div>
+		
+		</section>
+	
+	
+		<script src="http://localhost:35729/livereload.js"></script>
+	
+	</body>
+</html>

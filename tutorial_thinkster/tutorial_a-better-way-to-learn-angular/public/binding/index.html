@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+	<head>
+		<title>BINDING - Thinkster - A better way to learn Angular</title>
+		<script src="../js/angular.min.js"></script>
+		
+		<!-- defines controller and bind data to $scope -->
+		<script type="text/javascript">
+			angular.module('inputExample', [])
+				.controller('ExampleController', ['$scope', function($scope){
+					$scope.val = 'hello';
+				}])
+				.controller('oneTimeBindingController', ['$scope', function($scope){
+					var counter = 0;
+					var names = ['igor', 'misko', 'Chirayu', 'Lucas'];
+					
+					$scope.names = names;
+					
+					$scope.clickMe = function(clickEvent){
+						$scope.name = names[counter % names.length];
+						counter++;
+					}
+					
+				}])
+				.filter('getNames', function(){
+					return function(names){
+						return names.map(function (names){
+							return names;
+						}).join(' : ');
+					}
+				})
+		</script>
+		
+		
+		<!-- define styles for input validation -->
+		<style type="text/css">
+			div div{
+				border: 1px solid limegreen;
+				margin-bottom: 30px;
+			}
+			.my-input{
+				color: White;
+				transition: all linear 1s;
+				background: transparent;
+			}
+			.my-input.ng-invalid{
+				color: White;
+				background: red;
+			}
+			.my-input.ng-valid{
+				background: green;
+			}
+			.important{
+				background: bisque;
+			}
+		</style>
+		
+		
+	</head>
+	
+	<!-- https://thinkster.io/a-better-way-to-learn-angularjs/binding -->
+	
+	<body>
+		<div ng-app="inputExample">
+			<!-- basic i/o with model and view -->
+			<div>
+				<h1>Binding</h1>
+				<input type="text" ng-model="message">
+				<p>{{ message }}</p>
+			</div>
+			
+			<!-- try out angular expression -->
+			<div>
+				<h2>Binding : try out expressions</h2>
+				<input type="text" ng-model="message1">
+				<p>{{ message1 }}</p>
+				<p>{{ message1 + message1 }}</p>
+				<p>{{ message1 === 'hello' }}</p>
+				<p>{{ 1 + 2 }}</p>
+			</div>
+			
+			<!-- Binding using "ng-bind" attribute.
+					Replacing the {{ * }} with this attribute 
+					will avoid having the curly braces displayed 
+					while angular loads. -->
+			<div>
+				<h2>Binding with "ng-bind"</h2>
+				<input type="text" ng-model="message2" value="hello world">
+				<p class="important" ng-bind="message2"></p>
+			</div>
+			
+			<!-- One time Binding = prefix the variable with "::" -->
+			<div>
+				<h1 ng-bind="'One time Binding: ' + message3"></h1>
+				<input type="text" ng-model="message3" ng-init="message3 = 'hello'">
+				<p ng-bind="message3"></p>
+				<p ng-bind="message3 + message3"></p>
+				<p ng-bind="::message3 === 'hello'"></p>
+				<!-- doesn't work -->
+				<p class="important" ng-bind="'This would always be  ' + ::message3"></p>
+				<!-- will work -->
+				<p class="important">This would always be : {{ ::message3 }}</p>
+				<p ng-bind="1 + 2"></p>
+				
+				<!-- https://docs.angularjs.org/guide/expression#one-time-binding -->
+				<div ng-controller="oneTimeBindingController">
+					<button id="clickButton" ng-click="clickMe($event)" >List of names == {{ names | getNames }}</button>
+					<p id="one-time-binding-example">One time binding: {{ ::name }}</p>
+					<p id="normal-binding-example">Normal binding: {{ name }}</p>
+				</div>
+				
+			</div>
+			
+			<!-- https://docs.angularjs.org/api/ng/directive/ngModel -->
+			<div id="inputValidationExample">
+				<p id="inputDescription">The input will change depending on its validation (must be exactly 'hello')</p>
+				<form name="testForm" ng-controller="ExampleController">
+					<input ng-model="val" ng-pattern="/^hello$/" name="inputRegex" class="my-input" aria-describedby="inputDescription" data-ng-required="true">
+				</form>
+			</div>
+			   
+		</div>          
+		   
+		<script src="http://localhost:35729/livereload.js"></script>
+		
+		
+	</body>
+</html>
