@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+	<head>
+		<title>ANGULAR FORMS - Thinkster Tutorial (angular dev guide)</title>
+		<script src="../js/angular.min.js"></script>
+		<script>
+			
+			//***** https://docs.angularjs.org/guide/forms *****//
+			
+			// angular definition
+			angular.module('formApp', [])
+			
+			// use of "Controller as"
+			.controller('ExampleController', function(){
+				var self = this;
+				
+				self.master = {};
+				
+				self.reset = function(){
+					self.user = angular.copy(self.master);
+				};
+				
+				self.update = function(user){
+					self.master = angular.copy(user);
+				}
+				
+				self.reset();
+				
+			})
+			
+			.controller('ExampleController2', function(){
+				var self = this;
+				self.master = {};
+				self.update = function(user){
+					self.master = angular.copy(user);
+				}
+				self.reset = function(){
+					self.user = angular.copy(self.master);
+				}
+				self.reset();
+			})
+		
+		
+		</script>
+		<style>
+			/**
+			 * CSS Class for form validation
+			 */
+			label{
+				display: block;
+			}
+
+			.ng-valid{
+				background: lightblue;
+				transition: all 1s linear;
+			}
+			.ng-dirty{
+				border: 3px solid yellow;
+			}
+			.ng-pristine{
+				border: 3px solid Green;
+			}
+			.ng-invalid{
+				background: tomato;
+				transition: all 1s linear;
+			}
+
+
+		
+		</style>
+	</head>
+	<body>
+	
+		<!--  https://docs.angularjs.org/guide/forms  -->
+	
+		<main ng-app="formApp">
+		
+			<section ng-controller="ExampleController as ctrl">
+				<h1>Simple Form</h1>
+				
+				<form novalidate class="simple-form">
+					<label>Name : <input type="text" ng-model="ctrl.user.name"></label>
+					<label>E-mail: <input type="email" ng-model="ctrl.user.email"></label>
+					<span>Gender: </span><label><input type="radio" ng-model="ctrl.user.gender" value="male">male</label>
+					<label><input type="radio" ng-model="ctrl.user.gender" value="female">female</label>
+					<input type="button" ng-click="ctrl.reset()" value="reset">
+					<input type="button" ng-click="ctrl.update(ctrl.user)" value="save">
+				</form>
+				<pre>user = {{ ctrl.user | json }}</pre>
+				<pre>master = {{ ctrl.master | json }}</pre>
+				
+			</section>
+			
+			<section ng-controller="ExampleController2 as ctrl">
+				<h2>Binding to form and control state</h2>
+				
+				<!-- added the name="form", to publish into scope -->
+				<form name="form" class="css-form-2" novalidate>
+					<label>Name:
+						<input type="text" ng-model="ctrl.user.name" name="uName" required="" >
+					</label>
+					<!-- here lies the error that is shown on a certain condition -->
+					<div ng-show="form.$submitted || form.uName.$touched">
+						<div ng-show="form.uName.$error.required">You should tell your name</div>
+					</div>
+					
+					<label>Email:
+						<input type="email" ng-model="ctrl.user.email" name="uEmail" required="">
+					</label>
+					<div ng-show="form.$submitted || form.uEmail.$touched">
+						<span ng-show="form.uEmail.$error.required">Tell us your email</span>
+						<span ng-show="form.uEmail.$error.email">This is not a valid email</span>
+					</div>
+					
+					Gender: 
+					<label><input type="radio" ng-model="ctrl.user.gender" value="male">male</label>
+					<label><input type="radio" ng-model="ctrl.user.gender" value="female">female</label>
+					
+					<label>
+						<input type="checkbox" ng-model="ctrl.user.agree" name="uAgree" required="">
+						I agree:
+					</label>
+					
+					<input ng-show="ctrl.user.agree" type="text" ng-model="ctrl.user.agreeSign" required="">
+					<div ng-show="form.$submitted || form.uAgree.$touched">
+						<div ng-show="!ctrl.user.agree || !ctrl.user.agreeSign">Please agree and sign.</div>
+					</div>
+					
+					<button ng-click="ctrl.reset()">Reset</button>
+					<button ng-click="ctrl.update(ctrl.user)">Update</button>
+					
+					<pre>User: {{ ctrl.user | json }}</pre>
+					<pre>Master: {{ ctrl.master | json }}</pre>
+				
+				</form>
+			
+			</section>
+			
+			
+		
+		</main>
+	
+		<script src="http://localhost:35729/livereload.js"></script>
+	</body>
+</html>
