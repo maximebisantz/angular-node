@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+
+	<head>
+		<title>FILTERS - thinkster tutorial</title>
+		<script src="../js/angular.min.js"></script>
+		<script>
+			
+			//  https://thinkster.io/a-better-way-to-learn-angularjs //
+			//  https://thinkster.io/a-better-way-to-learn-angularjs/ngfilter //
+			
+			// basic controller with the scope myString
+			function filterController(){
+				var self = this;
+				self.myString = "hello world";
+				self.people = [
+               		{
+               			name : 'Eric Simons',
+               			born : 'Chicago'
+               		},
+               		{
+               			name : 'Albert Pai',
+               			born : 'Taiwan'
+               		},
+               		{
+               			name : 'Matthew Greenster',
+               			born : 'Amsterdam'
+               		}
+               	];
+				self.username = "Max Bisantz";
+				self.friends = [{
+					name : 'Andrew'
+				}, {
+					name : 'Will'
+				}, {
+					name : 'Mark'
+				}, {
+					name : 'Alice'
+				}, {
+					name : 'Todd'
+				}];
+			}
+		
+			// filter function
+			function CapitalizeFilter(){
+				// this is the function angular execute when the expression is evaluated
+				return function(text){
+					return text.toUpperCase();
+				}
+			}
+			
+			// binding the functions to respective controller & fitler
+			angular.module('filterApp', [])
+			
+			.controller('filterController', filterController)
+			
+			.filter('capitalize', CapitalizeFilter)
+			
+			// filter method, creating 'makeUppercase' a globally available fitler in our module.
+			.filter('makeUppercase', function(){
+				// function that is invoked each time Angular runs $digest()
+				// pass in 'item' which is the single Object we'll manipulate
+				return function(item){
+					// return the current item but call toUpperCase on it
+					return item.toUpperCase();
+				};
+			})
+			
+			.filter('startWithA', function(){
+				return function(items){
+					// ES5+ array.prototype.filter
+					if(typeof items.filter === 'function'){
+						console.log('in the ES5 function');
+						return items.filter(function(item){
+							return /a/i.test(item.name.substring(0,1));
+						})
+					}
+					//else
+					var filtered = [];
+					for(var i=0; i < items.length; i++){
+						var item = items[i];
+						if(/a/i.test(item.name.substring(0,1))){
+							filtered.push(item);
+						}
+					}
+					return filtered;
+				};
+			})
+			
+			.filter('startWithLetter', function(){
+				return function(items, letter){
+					return items.filter(function(item){
+						var regExp = new RegExp(letter, 'i');
+						return regExp.test(item.name.substring(0,1));
+					});
+				};
+			})
+			
+		
+		</script>
+	</head>
+	<body>
+	
+		<main ng-app="filterApp">
+		
+			<section ng-controller="filterController as test">
+				<h1>Filters</h1>
+				<input type="text" ng-model="test.myString">
+				<h2>
+					<!-- creating the filter after the pipe "|" -->
+					{{ test.myString | capitalize }}
+				</h2>
+				<hr>
+				<h1>ngFitler</h1>
+				<input type="text" ng-model="search">
+				<p ng-repeat="person in test.people | filter: search">
+					{{ person.name }}
+				</p>
+				
+				<!-- filter "orderBy" -->
+				<hr style="border: 1px solid red; width: 300px; margin: 0">
+				<h3>Ordered by name</h3>
+				<p ng-repeat="person in test.people | orderBy:'name'">
+					{{ person.name }}
+				</p>
+				
+				<!-- filter "limitTo" -->
+				<hr style="border: 1px solid red; width: 300px; margin: 0;">
+				<h3>Limit to 2</h3>
+				<p ng-repeat="person in test.people | limitTo:2">
+					{{ person.name }} : {{ person.born }}
+				</p>
+				
+				<!-- Chaining filters -->
+				<hr style="border: 1px solid red; width: 300px; margin: 0;">
+				<h3>Order by name and limit to 1</h3>
+				<p ng-repeat="person in test.people | orderBy:'name' | limitTo:1 ">
+					{{ person.name }} : {{ person.born }}
+				</p>
+				
+				<hr><hr><hr>
+				<!-- https://toddmotto.com/everything-about-custom-filters-in-angular-js/ -->
+				<!-- static filter -->
+				<h1>Static filter</h1>
+				<p>1480342878841 : {{ 1480342878841 | date: 'dd-MM-yyyy' }}</p>
+				
+				<hr>
+				<!-- custom filter makeUppercase() -->
+				<h1>Custom filter makeUppercase</h1>
+				<p>{{ test.username | makeUppercase }}</p>
+				
+				<hr>
+				<h1>Custom filter on Repeat "startWithA"</h1>
+				<ul>
+					<li ng-repeat="friend in test.friends | startWithA">{{ friend }}</li> 
+				</ul>
+				
+				<hr>
+				<h1>Filters for repeats with arguments</h1>
+				<input type="text" ng-model="startLetter">
+				<ul>
+					<li ng-repeat="friend in test.friends | startWithLetter:startLetter">{{ friend }}</li>
+				</ul>
+			</section>
+		
+		</main>
+	
+	
+	</body>
+
+</html>

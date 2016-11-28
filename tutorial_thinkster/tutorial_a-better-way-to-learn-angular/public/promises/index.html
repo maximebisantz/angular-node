@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+	<head>
+		<title>ANGULAR PROMISES - Thinkster tutorial</title>
+		<script type="text/javascript" src="../js/angular.min.js"></script>
+		<script type="text/javascript">
+		
+			// ------------------- https://thinkster.io/a-better-way-to-learn-angularjs/promises ---------------------------- //
+			// -------------------------------------------------------------------------------------------------------------- //
+			
+			function getData($timeout, $q){
+				return function(){
+					/*
+						A deferred object is simply an object that exposes a promise
+						as well as the assiocited methods for resovling that promise.
+						contructed via $q.deferred() function.
+					*/
+					var defer = $q.defer();
+					
+					// simulate async function
+					$timeout(function(){
+						/*
+							it exposes three main methods: 
+								resolve()
+								reject()
+								notify()
+						*/
+						
+						// simulate sucess and failure
+						if(Math.round(Math.random())){
+							defer.resolve('data recieved');
+							/** the parameter of the resolve() will be passed to the callback function **/
+						}else{
+							// the failure
+							defer.reject('oops an error occured!');
+						}
+						
+					}, 2000);
+					
+					// expose the promise.
+					return defer.promise;
+				};
+			};
+			
+			// using the $q constructor to convert an async callback into a promise based solution.
+			function getData2($timeout, $q){
+				return function(){
+					// $q
+					return $q(function(resolve, reject){
+						$timeout(function(){
+							if(Math.round(Math.random())){
+								resolve('second data recieved');
+							}else{
+								reject('second Error thrown!');
+							}
+						}, 3000);
+					})
+				}
+			};
+			
+			// Promise Chaining. - Modify the function at fisrt to pass a random
+			// number between 0 -9.
+			function getData3($timeout, $q){
+				return function(){
+					return $q(function(resolve, reject){
+						$timeout(function(){
+							resolve(Math.floor(Math.random() * 10));
+						}, 5000);
+					});
+				}
+			}
+			
+			var app = angular.module('promisesApp', []);
+			
+			app.factory('getData', getData);
+			
+ 			app.run(function(getData){
+				
+				/* 	Now that we've obtained a promise object (defer.promise)
+					let's register a callback function that'll be executed after the 
+					async function completes  : .then() 
+				*/
+				var promise = getData().then(function(string){
+					console.log(string);
+				}, function(error){
+					// the second paramter of .then() is a callback called only on failure.
+					console.log(error);
+				});
+			});
+ 		
+			
+			
+			app.factory('getData2', getData2);
+			
+			app.run(function(getData2){
+				var promise = getData2().then(function(str){
+					console.log(str);
+				}, function(err){
+					console.log(err);
+				})
+				.finally(function(){
+					// The .finally() after .then() will call no matter what the result of the promise is.
+					console.log('Finished at : ', new Date());
+				})
+			});
+			
+			// Promise Chaining - modify the callback to return the number * 2
+			app.factory('getData3', getData3);
+			
+			app.run(function(getData3){
+				var promise = getData3()
+					.then(function(num){
+						console.log(num);
+						return num * 2;
+					})
+					// now we can chain antoher callback to the promise using the .then() function
+					// which will be executed after the fist callback returns.
+					.then(function(num){
+						console.log(num); // random number * 2
+					})
+			});
+			
+		
+		</script>
+	</head>
+	<body>
+	
+		<main ng-app="promisesApp">
+			Watch the Console!
+		
+		</main>
+	
+	</body>
+</html>

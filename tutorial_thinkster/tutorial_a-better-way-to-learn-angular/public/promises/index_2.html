@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+	<head>
+		<title>testable promises</title>
+		<script src="../js/angular.min.js"></script>
+		<script>
+			
+			var app = angular.module('app',[]);
+			
+			app.factory('getData', function($q, $timeout){
+				var data = {};
+				data.get = function(){
+					var defer = $q.defer();
+					
+					$timeout(function(){
+						defer.resolve('hello world');
+					}, 2000);
+					
+					return defer.promise;
+				}
+				data.be = function(){
+					return 'hello world not from promise';
+				}
+				return data;
+			});
+			
+			app.controller('ctrl', function($scope, getData){
+				
+				$scope.data = {};
+				
+				getData.get().then(function(str){
+					console.log(str);
+					$scope.data = str;
+				}); 
+				
+				
+			});
+		
+		
+		</script>
+	</head>
+	<body>
+		Watch the console - and especially the tests.
+	</body>
+</html>

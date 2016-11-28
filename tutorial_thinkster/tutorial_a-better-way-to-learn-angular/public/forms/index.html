@@ -39,6 +39,133 @@
 				}
 				self.reset();
 			})
+			
+			.controller('ExampleController3', function(){
+				var self = this;
+				self.user = {};
+			})
+			
+			.controller('ExampleController4', function(){
+				var self = this;
+				self.user = {};
+			})
+			
+			// directive for custom validation
+			.directive('integer', function(){
+				return {
+					require: 'ngModel',
+					link: function(scope, elm, attrs, ctrl){
+						
+						ctrl.$validators.integer = function(modelValue, viewValue){
+							if(ctrl.$isEmpty(modelValue)){
+								// consider empty models to be valid
+								return true;
+							}
+							
+							console.log(viewValue);
+							
+							// regEx to test against 
+							if(/^\-?\d+$/.test(viewValue)){
+								// it is valid
+								return true;
+							}
+							
+							// it is invalid
+							return false;
+							
+							
+						}
+						
+						// emulates the min value on a text input
+						ctrl.$validators.min = function(modelValue, viewValue){
+							if(viewValue < 0){
+								return false;
+							}
+							return true;
+							
+						}
+						// emulates the max value on a text input
+						ctrl.$validators.max = function(modelValue, viewValue){
+							if(viewValue > 10){
+								return false;
+							}
+							return true;
+						}
+						
+						
+					}
+				}
+			})
+			// emulates a call to the serverside (async validation)
+			.directive('username', function($q, $timeout){
+				return{
+					require: 'ngModel',
+					link: function(scope, elm, attrs, ctrl){
+						var usernames = ['jim', 'john', 'jill', 'jackie'];
+						
+						ctrl.$asyncValidators.username = function(modelValue, viewValue){
+							
+							if(ctrl.$isEmpty(modelValue)){
+								// consider empty valid
+								return $q.when(); // promise valid
+							}
+							
+							var def = $q.defer();
+							
+							$timeout(function(){
+								// mock a delayed response
+								if(usernames.indexOf(modelValue) === -1){
+									def.resolve();
+								} else {
+									def.reject();
+								}
+							}, 2000);
+							
+							return def.promise;
+						}
+					}
+					
+				}
+			})
+			// modify built in validators
+			.directive('overwriteEmail', function(){
+				
+				var EMAIL_REGEX = /^[a-z0-9!#$%&'*+/=?^_'{|}~.-]+@example\.com$/i;
+				
+				return {
+					require: '?ngModel',
+					link: function(scope, elm, attrs, ctrl){
+						// only apply the validator if ngModel is present and Angular has added the email validator
+						if(ctrl && ctrl.$validators.email){
+							
+							//this will overwrite the default Angular email validator
+							ctrl.$validators.email = function(modelValue){
+								return ctrl.$isEmpty(modelValue) || EMAIL_REGEX.test(modelValue);
+							}
+														
+						}
+					}
+				}
+				
+			})
+			// custom form controls using ngModel
+			.directive('contenteditable', function(){
+				return {
+					require: 'ngModel',
+					link: function(scope, elm, attrs, ctrl){
+						//view -> model
+						elm.on('blur', function(){
+							ctrl.$setViewValue(elm.html())
+						});
+						//model -> view
+						ctrl.$render = function(){
+							elm.html(ctrl.$viewValue);
+						};
+						// load init value from DOM
+						ctrl.$setViewValue(elm.html());
+					}
+				}
+			})
 		
 		
 		</script>
@@ -75,7 +202,7 @@
 	
 		<main ng-app="formApp">
 		
-			<section ng-controller="ExampleController as ctrl">
+			<section id="ExampleController" ng-controller="ExampleController as ctrl">
 				<h1>Simple Form</h1>
 				
 				<form novalidate class="simple-form">
@@ -83,15 +210,15 @@
 					<label>E-mail: <input type="email" ng-model="ctrl.user.email"></label>
 					<span>Gender: </span><label><input type="radio" ng-model="ctrl.user.gender" value="male">male</label>
 					<label><input type="radio" ng-model="ctrl.user.gender" value="female">female</label>
-					<input type="button" ng-click="ctrl.reset()" value="reset">
-					<input type="button" ng-click="ctrl.update(ctrl.user)" value="save">
+					<input id="resetControl1" type="button" ng-click="ctrl.reset()" value="reset">
+					<input id="updateControl1" type="button" ng-click="ctrl.update(ctrl.user)" value="save">
 				</form>
-				<pre>user = {{ ctrl.user | json }}</pre>
-				<pre>master = {{ ctrl.master | json }}</pre>
+				<pre id="user1">user = {{ ctrl.user | json }}</pre>
+				<pre id="master1">master = {{ ctrl.master | json }}</pre>
 				
 			</section>
 			
-			<section ng-controller="ExampleController2 as ctrl">
+			<section id="ExampleController2" ng-controller="ExampleController2 as ctrl">
 				<h2>Binding to form and control state</h2>
 				
 				<!-- added the name="form", to publish into scope -->
@@ -101,15 +228,15 @@
 					</label>
 					<!-- here lies the error that is shown on a certain condition -->
 					<div ng-show="form.$submitted || form.uName.$touched">
-						<div ng-show="form.uName.$error.required">You should tell your name</div>
+						<div id="nameError2" ng-show="form.uName.$error.required">You should tell your name</div>
 					</div>
 					
 					<label>Email:
 						<input type="email" ng-model="ctrl.user.email" name="uEmail" required="">
 					</label>
 					<div ng-show="form.$submitted || form.uEmail.$touched">
-						<span ng-show="form.uEmail.$error.required">Tell us your email</span>
-						<span ng-show="form.uEmail.$error.email">This is not a valid email</span>
+						<span id="emailRequired1" ng-show="form.uEmail.$error.required">Tell us your email</span>
+						<span id="emailValid1" ng-show="form.uEmail.$error.email">This is not a valid email</span>
 					</div>
 					
 					Gender: 
@@ -122,8 +249,8 @@
 					</label>
 					
 					<input ng-show="ctrl.user.agree" type="text" ng-model="ctrl.user.agreeSign" required="">
-					<div ng-show="form.$submitted || form.uAgree.$touched">
-						<div ng-show="!ctrl.user.agree || !ctrl.user.agreeSign">Please agree and sign.</div>
+					<div  ng-show="form.$submitted || form.uAgree.$touched">
+						<div  id="agreeValidation2" ng-show="!ctrl.user.agree || !ctrl.user.agreeSign">Please agree and sign.</div>
 					</div>
 					
 					<button ng-click="ctrl.reset()">Reset</button>
@@ -134,6 +261,78 @@
 				
 				</form>
 			
+			</section>
+			
+			<section ng-controller="ExampleController3 as ctrl">
+				<h1>Custom model update triggers</h1>
+				<form>
+					<label>Name (updateOn: 'blur'):
+						<input type="text" ng-model="ctrl.user.name" ng-model-options="{ updateOn: 'blur'}">
+					</label>
+					<label>Other data (normal):
+						<input type="text" ng-model="ctrl.user.data">
+					</label>
+				</form>
+				<pre>username = "{{ ctrl.user.name }}"</pre>
+				<pre>otherdata = "{{ ctrl.user.data }}"</pre>
+				
+				<h1>Non-immediate (debounced) model updates</h1>
+				<form>
+					<label>Name:
+						<input type="text" ng-model="ctrl.user.name2" ng-model-options="{ debounce : 500 }">
+					</label>
+				</form>
+				<pre>username = "{{ ctrl.user.name2 }}"</pre>
+				
+			</section>
+			
+			<section id="ExampleController4" ng-controller="ExampleController4 as ctrl">
+				<h1>Custom Validation</h1>
+				<p>With a custom directive, you can add your own validation functions to the $validators object on the ngModelController.</p>
+				<p>Additionally, there is the $asyncValidators object which handles asynchronous validation, such as making an $http request to the backend.</p>
+				
+				<form name="form" class="css-form" novalidate>
+					<div>
+						<label>
+							Size (integer 0 - 10): 
+							<input type="text" ng-model="ctrl.size" name="size" min="0" max="10" integer>
+							{{ctrl.size}}
+						</label>
+						<span name="errorInvalid" ng-show="form.size.$error.integer">The value is not a valid integer!</span>
+						<span name="errorRange" ng-show="form.size.$error.min || form.size.$error.max">The value must be in range 0 to 10!</span>
+					</div>
+					<div>
+						<label>
+							Username:
+							<input type="text" ng-model="ctrl.name" name="name" username>
+							{{ctrl.name}}
+						</label>
+						<span ng-show="form.name.$pending.username">Checking if this name is valid...</span>
+						<span ng-show="form.name.$error.username">This username is already taken</span>
+					</div>
+					
+				</form>
+				
+				<h1>Modifying built-in validators</h1>
+				<form name="form2" novalidate>
+					<div>
+						<label>
+							Overwritten Email:
+							<input type="email" ng-model="ctrl.myEmail" overwrite-email name="overwrittenEmail">
+						</label>
+						<span ng-show="form2.overwrittenEmail.$error.email">This email format is invalid!</span>
+						Model : {{ctrl.myEmail}}
+					</div>
+				</form>
+				
+				<h1>Implementing custom form controls (using ngModel)</h1>
+				<p>In order for custom control to work with ngModel and to achieve two-way data-binding it needs to:<br/>
+					implement $render method, which is responsible for rendering the data after it passed the NgModelController.$formatters,<br/>
+					call $setViewValue method, whenever the user interacts with the control and model needs to be updated. This is usually done inside a DOM Event listener.</p>
+				
+				<div contentEditable="true" ng-model="ctrl.content" title="click to edit">Blah</div>
+				<pre>model = {{ctrl.content}}</pre>
+				
 			</section>
 			
 			
