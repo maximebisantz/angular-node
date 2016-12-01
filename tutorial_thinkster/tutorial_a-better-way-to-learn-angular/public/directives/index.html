@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+	<head>
+		<title>DIRECTIVES - thinkster tutorial</title>
+		<script src="../js/angular.min.js"></script>
+		<script type="text/javascript">
+			
+			// ---- https://thinkster.io/a-better-way-to-learn-angularjs ---- //
+			
+			/** Create a directive **/
+			angular.module('greetings', [])
+			.directive('welcome', function(){
+				// return an object with a property "restrict : 'E'" to limit this directive to Elements
+				// the object also has the template property specifying the HTML for the directive.
+				return {
+					restrict : "E",
+					template : "<div>Howdy there! How you doing?</div>"
+				}
+			})
+			// ----- https://thinkster.io/a-better-way-to-learn-angularjs/directive-restrictions ------ //
+			// It's more common to create custom attributes. 
+			// These attribute are goint to add things like behaviors, and 
+			// we can restrict it by using "A" (for attribute)
+			// You can provide a linking function which is where you put the behavior
+			.directive('alertwelcome', function(){
+				return {
+					restrict : "A",
+					link : function(){
+						alert('Howdy!');
+					}
+				}
+			})
+			// restricted to class "C"
+			.directive('classdirective', function(){
+				return {
+					restrict : 'C',
+					link : function(){
+						alert('class directive');
+					}
+				}
+			})
+			// last restriction is for comments "M"
+			.directive('commentdirective', function(){
+				return {
+					restrict : 'M',
+					link : function(){
+						alert('comment directive');
+					}
+				}
+			})
+			.directive('goodbye', function(){
+				return{
+					restrict : 'A',
+					link : function(){
+						alert('good bye from stacked directive attribute');
+					}
+				}
+			})
+			//***------------- https://thinkster.io/a-better-way-to-learn-angularjs/basic-directive-functionality ----------------- ***//
+			// if you don't specify a restriction, the default is "A" (attribute)
+			// If all the directive is for is the linking function, we can declare
+			// it using the shorthand version: 
+			.directive('entering', function(){
+				return function(scope, element, attributes){
+					element.bind('mouseenter', function(){
+						window.alert('mouse has entered the div');
+						element.addClass(attributes.entering);
+					})
+				}
+			})
+			// duplicate the directive to be on the mouse leave event
+			.directive('leaving', function(){
+				return function(scope, element, attributes){
+					element.bind('mouseleave', function(){
+						window.alert('mouse has left the div');
+						element.removeClass(attributes.entering);
+					})
+				}
+			})
+			
+			// test for attrs.$observe()
+			.controller('ctrl', function($scope){
+				$scope.classname = "myClass";
+			})
+			
+			.directive('interpolationenter', function(){
+				return function(scope, element, attrs){
+					element.bind('mouseenter', function(){
+						//window.alert('interpolation');
+						window.alert(attrs.interpolationenter); //should have been undefined but returns the value from the controller's scope. So everyhting is good.
+					})
+				}
+			})
+			
+			// --- https://thinkster.io/a-better-way-to-learn-angularjs/directives-talking-to-controllers --- //
+			// Directives talking to Controllers
+			.controller('FunCtrl', function(){
+				var self = this;
+				self.start = function(){
+					window.alert('fun times have been started');
+				};
+				self.end = function(){
+					window.alert('fun times are over');
+				}
+			})
+			
+			.directive('fundirective', function(){
+				return function(scope, element, attrs){
+					element.bind('mouseenter', function(){
+						// scope.fun.start(); -> not best practice
+						// scope.$apply('fun.start()'); -> better but still has limitations
+						scope.$apply(attrs.fundirective); // best way. the call is put on the attribute in the view. And we can call different functions in the view.
+					})
+				}
+			})
+			
+			// ---- https://thinkster.io/a-better-way-to-learn-angularjs/directive-to-directive-communication ---- //
+			.directive('welcometwo', function(){
+				return{
+					restrict: 'E',
+					scope: {}, // ISOLATED SCOPE
+					// Here, the welcome directive has a controller defined in it that will be 
+					// used as an API for other directives to interact with it.
+					controller: function($scope){
+						$scope.words = [];
+						this.sayHello = function(){
+							$scope.words.push('hello');
+						};
+						this.sayHowdy = function(){
+							$scope.words.push('howdy');
+						};
+						this.sayHi = function(){
+							$scope.words.push('hi');
+						};
+					},
+					link: function(scope, element){
+						element.bind('mouseenter', function(){
+							window.alert(scope.words);
+						})
+					}
+				}
+			})
+			
+			// next we set up another directive within the app to interact with the welcometwo directive
+			.directive('hello', function(){
+				return {
+					require: 'welcometwo',
+					// Here, we require the welcome controller, which gives us access to the controller 
+					// (located in the foreign directive) in this directive’s linking function through 
+					// an additional link function parameter - here, welcomeCtrl.
+					link: function(scope, element, attrs, welcomeCtrl){
+						welcomeCtrl.sayHello();
+					}
+				}
+			})
+			.directive('howdy', function(){
+				return {
+					require: 'welcometwo',
+					link: function(scope, element, attrs, welcomeCtrl){
+						welcomeCtrl.sayHowdy();
+					}
+				}
+			})
+			.directive('hi', function(){
+				return{
+					require: 'welcometwo',
+					link: function(scope, element, attrs, welcomeCtrl){
+						welcomeCtrl.sayHi();
+					}
+				}
+			})
+			/** -> now each of these directives are tied to the welcometwo controller's API **/
+			
+			// ----- https://thinkster.io/a-better-way-to-learn-angularjs/transclusion ---- //
+			.directive('welcomethree', function(){
+				return {
+					restrict: 'E',
+					scope: {},
+					// if the content within the <welcomethree> tag is intended to persist,
+					// the directive needs to have transclusion enabled.
+					// Everything inside the tag will be put inside <ng-transclude>
+					transclude: true,
+					template: '<div>This is the welcomethree component</div><ng-transclude></ng-transclude>'
+				}
+			})
+		
+		
+		</script>
+		<style type="text/css">
+			.activeClass{
+				background: limegreen;
+			}
+		</style>
+	</head>
+	<body>
+		
+		<main ng-app="greetings">
+			<!-- this would be the welcome directive -->
+			<h1>Create the directive and call it using the HTML element &lt;welcome&gt;</h1>
+			<welcome></welcome>
+			
+			<hr>
+			
+			<div alertwelcome>this &lt;div&gt; has the attribute "alertwelcome"</div>
+			<p> "alertWelcome" didn't work, it had to be all lowercase</p>
+			
+			<hr>
+			
+			<div class="classdirective">this &lt;div&gt; has the <code>class="classdirective"</code></div>
+			
+			<hr>
+			<!-- directive: commentdirective -->
+			<div>Above this <code>&lt;div&gt;</code> there is the comment <code>&lt;-- directive : commentdirective --&gt;</code></div>
+			
+			<hr>
+			<div alertwelcome goodbye>This <code>&lt;div&gt;</code> has both <code>alertwelcome</code> and <code>goodbye</code> attribute directive</div>
+			
+			<hr>
+			<div entering="activeClass" leaving style="border: 1px solid red; width: 200px; height: 200px;">
+				This <code>&lt;div&gt;</code> has <code>entering</code> attribute
+				and should fire an event on mouse enter. Also has the <code>leaving</code>
+				attribute and should fire an event on mouse leave.
+			</div>
+			
+			<hr>
+			<div ng-controller="ctrl">
+				<div interpolationenter="{{ classname }}" style="border: 1px solid red; width: 200px; height: 200px;">Blah</div>
+			</div>
+			
+			<hr>
+			<div ng-controller="FunCtrl as fun">
+				<div fundirective="fun.start()" style="border: 1px solid red; width: 200px; height: 200px;">Fun Directive</div>
+				<div fundirective="fun.end()" style="border: 1px solid red; width: 200px; height: 200px;">Fun End</div>
+			</div>
+			
+			<hr>
+			<h1>Directive to directive communication</h1>
+			<div>
+				<welcometwo hi hello style="border: 1px solid green; width: 100px; height: 100px; display: block"></welcometwo>
+				<welcometwo howdy>Second instance of welcometwo</welcometwo>
+			</div>
+			
+			<hr>
+			<h1>Transclusion directive</h1>
+			<div>
+				<welcomethree>
+					<button>Click this button</button>
+				</welcomethree>
+			</div>
+			
+		</main>
+	
+	</body>
+</html>
