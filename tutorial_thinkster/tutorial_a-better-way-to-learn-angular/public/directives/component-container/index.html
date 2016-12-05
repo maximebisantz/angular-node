@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Component & Containers - thinkster tutorial</title>
+		<script src="../../js/angular.min.js"></script>
+		<script src="app.js"></script>
+	</head>
+	<body>
+		<h1>Component & Containers</h1>
+		<div ng-app="app">
+			<clock timezone="MST"></clock>
+			<panel title="I'm a title">
+				CONTAINER
+				<clock timezone="PST"></clock>
+			</panel>
+			<panel title="I'm a CONTAINER">
+				<clock timezone="I'm a component"></clock>
+				<clock timezone="MST"></clock>
+			</panel>
+		</div>
+	</body>
+</html>

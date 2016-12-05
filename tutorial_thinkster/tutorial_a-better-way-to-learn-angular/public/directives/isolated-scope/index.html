@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Isolated Scope - thinkster tutorial</title>
+		<script src="../../js/angular.min.js"></script> 
+		<script src="app.js"></script>
+	</head>
+	<body>
+	
+		<!-- https://thinkster.io/egghead/understanding-isolate-scope -->
+		<h1>Chore App</h1>
+		<div ng-app="choreApp">
+			<!-- use of the KID directive -->
+			<kid></kid>
+			<p>Mutliple directives</p> 
+			<kid></kid>
+			<kid></kid>
+			<kid></kid>
+			<kid></kid>
+			
+			<h2>Kid directive with ChoreCtrl</h2>
+			<p>Watch console.log</p>
+			<div ng-controller="ChoreCtrl as ctrl">
+				<kid done="ctrl.logChore(chore)"></kid>
+			</div>
+			
+			
+		</div>
+		
+		
+	</body>
+</html>
